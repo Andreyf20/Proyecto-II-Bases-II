@@ -25,3 +25,22 @@ sqoop import --connect 'jdbc:sqlserver://[INSERT IP HERE]:1433;databasename=Viaj
 java.lang.RuntimeException: Could not load db driver class: com.microsoft.sqlserver.jdbc.SQLServerDriver => https://www.mssqltips.com/sqlservertip/4445/sqoop-runtime-exception-cannot-load-sql-server-driver/
 
 java.lang.UnsupportedClassVersionError: com/microsoft/sqlserver/jdbc/SQLServerDriver : Unsupported major.minor version 52.0 => Use sqljdbc41.jar for Java 1.
+
+## Server de Zookeeper
+
+1. Agregar a la variable de sistema la variable JAVA_HOME: path/to/jdk 
+
+***Nota:** No incluir la carpeta bin ni el / final
+
+2. Correr dentro de la carpeta bin de zookeeper: zkserver
+
+## Iniciar server de Kafka
+
+1. Correr dentro del bin de la carpeta windows: ..\..\config\server.properties kafka-server-start
+
+2. Correr dentro de bin\windows: kafka-topics --create --bootstrap-server 25.108.214.3:9092 --replication-factor 1 --partitions 1 --topic busquedas. De igual manera con los demás topics. 
+
+3. Correr dentro de bin\windows: kafka-topics --list --bootstrap-server 25.108.214.3:9092. Este comando debe mostrar el topic *busquedas*. Similarmente para todos los topics. 
+
+***NOTA:** El nombre del directorio de kafka deber ser un nombre pequeño, como kafka, de otra manera se va a producir una excepción de "nombre muy largo".
+
