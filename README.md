@@ -44,3 +44,14 @@ java.lang.UnsupportedClassVersionError: com/microsoft/sqlserver/jdbc/SQLServerDr
 
 ***NOTA:** El nombre del directorio de kafka deber ser un nombre pequeño, como kafka, de otra manera se va a producir una excepción de "nombre muy largo".
 
+## Express API
+
+Se instalen las siguientes dependencias de npm:
+
+* "@types/node": "14.0.26"
+* "body-parser": "1.19.0"
+* "express": "4.17.1"
+* "kafkajs": "1.12.0"
+* "morgan": "1.10.0"
+* "ts-node": "8.10.2"
+* "typescript": "3.9.7"
