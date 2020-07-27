@@ -44,6 +44,13 @@ java.lang.UnsupportedClassVersionError: com/microsoft/sqlserver/jdbc/SQLServerDr
 
 ***NOTA:** El nombre del directorio de kafka deber ser un nombre pequeño, como kafka, de otra manera se va a producir una excepción de "nombre muy largo".
 
+## Server de MemSQL
+[Referencia](https://hub.docker.com/r/memsql/cluster-in-a-box)
+
+1. docker pull memsql/cluster-in-a-box
+
+2. docker run -i --init --name memsql-ciab -e LICENSE_KEY=[License-key] -p 3306:3306 -p 8080:8080 memsql/cluster-in-a-box
+
 ## Express API
 
 Se instalen las siguientes dependencias de npm:
