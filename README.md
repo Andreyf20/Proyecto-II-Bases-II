@@ -63,3 +63,23 @@ Se instalen las siguientes dependencias de npm:
 * "ts-node": "8.10.2"
 * "typescript": "3.9.7"
 
+## Crear un pipeline de Kafka y consumirlo
+
+CREATE PIPELINE IF NOT EXISTS pipelinetest AS LOAD DATA KAFKA '25.108.214.3/busquedas'INTO TABLE test;
+
+START PIPELINE pipelinetest;
+
+## Conectar Kafka con Hadoop
+
+### Instalar Confluent Platform
+
+Se debe descargar [Confluent Platform](https://www.confluent.io/download/?_ga=2.59539949.1100093247.1595907848-164450980.1595907848) y descomprimir el archivo. 
+
+***NOTA:** Para los siguientes pasos es necesario tener un WSL.
+Ahora se debe settear la variable $CONFLUENT_HOME con el comando: export CONFLUENT_HOME=/path/to/confluent_x.x
+Y añadir a $PATH mediante: export PATH=$PATH:$CONFLUENT_HOME/bin.
+
+Se debe ademas settear $JAVA_HOME usando: export JAVA_HOME=/usr/lib/jvm/x.x-jdk
+
+Por último, inicar confluent con: confluent local start
+
