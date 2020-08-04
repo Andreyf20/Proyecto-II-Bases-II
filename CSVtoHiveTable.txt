@@ -1,0 +1,19 @@
+-- Script para pasar de archivo csv a tabla
+-- Links de referencia:
+-- https://bigdataprogrammers.com/load-csv-file-in-hive/
+-- https://intellipaat.com/community/1598/where-does-hive-store-files-in-hdfs#:~:text=These%20files%20are%20where%20the,using%20LOCATION%20tag%20while%20creation.
+-- Suponinendo que el .csv esta en la ruta /user/cloudera/
+
+DROP TABLE tarifas;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS default.tarifas(
+CiudadOrigen STRING,
+CiudadDestino STRING,
+PrecioBoleto STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/user/cloudera/';
+
+select * FROM default.tarifas;
