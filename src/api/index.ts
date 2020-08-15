@@ -1,12 +1,27 @@
 import { env } from 'process';
 import { Kafka } from 'kafkajs';
+import { mysql } from 'mysql';
+const express = require('express');
+const mysql = require('mysql')
 
 const kafka = new Kafka({
   clientId: 'my-app',
   brokers: ['25.108.214.3:9092']
 })
 
-const express = require('express');
+const memsqldb = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'Precio_Viajes'
+});
+
+memsqldb.connect(function (err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
+
+
 let router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -39,4 +54,24 @@ router.get('/consume', async (req, res) => {
   })
   res.send('DONE')
 });
+
+router.get('/precio', async (req, res) => {
+  var sql = 'SELECT * FROM precios ORDER BY origen';
+
+  memsqldb.query(sql, (err, result) => {
+    if (err) {
+      throw err;
+    }
+    if (!result || !result.length) {
+      console.log("No results")
+      return;
+    }
+    console.log(result);
+  });
+});
+
+
+
+
+
 export = router;
