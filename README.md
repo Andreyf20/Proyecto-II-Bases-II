@@ -2,7 +2,7 @@
 
 ## Upgrading Cloudera to Java 1.8
 
-https://blog.clairvoyantsoft.com/upgrading-to-java8-on-the-cloudera-quickstart-vm-48855b1bc430
+[Ver](https://blog.clairvoyantsoft.com/upgrading-to-java8-on-the-cloudera-quickstart-vm-48855b1bc430)
 
 ## Sending sources to Hadoop file system
 
@@ -19,8 +19,9 @@ Copy the Java 1.7 version of the sqljdbc into the folder /usr/lib/sqoop/lib/
 Command example: sudo cp Downloads/sqljdbc_6.0/enu/jre7/sqljdbc41.jar /usr/lib/sqoop/lib/
 
 ## Importing SQL Server Database to Hive
-
-sqoop import --connect 'jdbc:sqlserver://[INSERT IP HERE]:1433;databasename=ViajesDomesticosCR' --username 'sa' --warehouse-dir=/user/hive/warehouse --hive-import --compression-codec=snap --as-parquetfile -P --table reservaciones --split-by transactionId -m 1
+```
+sqoop import --connect 'jdbc:sqlserver://[INSERT IP HERE]:1433;databasename=ViajesDomesticosCR' --username 'sa' --warehouse-dir=/user/hive/warehouse --hive-import --compression-codec=snappy --as-parquetfile -P --table reservaciones --split-by transactionId -m 1
+```
 
 1433 is Microsoft SQL Server default PORT
 
@@ -38,9 +39,9 @@ sqoop import --connect 'jdbc:sqlserver://[INSERT IP HERE]:1433;databasename=Viaj
 
 1. Correr dentro del bin de la carpeta windows: ..\..\config\server.properties kafka-server-start
 
-2. Correr dentro de bin: ./kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic busquedas
+2. Correr dentro de bin: kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic busquedas
 
-3. Correr dentro de bin: ./kafka-topics.sh --list --bootstrap-server localhost:9092
+3. Correr dentro de bin: kafka-topics --list --bootstrap-server localhost:9092
 
 **\*NOTA:** El nombre del directorio de kafka deber ser un nombre pequeño, como kafka, de otra manera se va a producir una excepción de "nombre muy largo".
 
@@ -63,6 +64,7 @@ Se instalen las siguientes dependencias de npm:
 - "express": "4.17.1"
 - "kafkajs": "1.12.0"
 - "morgan": "1.10.0"
+- "mysql": "2.18.1"
 - "ts-node": "8.10.2"
 - "typescript": "3.9.7"
 
@@ -76,18 +78,10 @@ CREATE PIPELINE IF NOT EXISTS pipelinetest AS LOAD DATA KAFKA '25.108.214.3/busq
 START PIPELINE pipelinetest;
 ```
 
-## Crear un pipeline de MemSQL con HDFS
-
-[Referencia](https://docs.memsql.com/v7.1/concepts/pipelines/hdfs-pipelines-overview/)
-
 ```
-DROP PIPELINE pipelineHDFS;
+CREATE DATABASE if not exists Precio_Viajes;
 
-CREATE PIPELINE pipelineHDFS AS LOAD DATA HDFS 'hdfs://25.104.59.86:8020/user/cloudera/output/' INTO TABLE testHDFS FIELDS TERMINATED BY ',';
-
-SELECT * FROM information_schema.pipelines_files WHERE pipeline_name = 'pipelineHDFS';
-
-START PIPELINE pipelineHDFS FOREGROUND LIMIT 1 BATCHES;
+CREATE TABLE if not exists precios(fecha DATETIME, origen TEXT, destino TEXT, precio REAL(6,2));
 ```
 
 ## Crear un intermediario con python para conectar con hive
@@ -105,6 +99,10 @@ $ pip install 'pyhive[hive]'
 
 ## Troubleshooting
 
-java.lang.RuntimeException: Could not load db driver class: com.microsoft.sqlserver.jdbc.SQLServerDriver => https://www.mssqltips.com/sqlservertip/4445/sqoop-runtime-exception-cannot-load-sql-server-driver/
+* java.lang.RuntimeException: Could not load db driver class: com.microsoft.sqlserver.jdbc.SQLServerDriver => https://www.mssqltips.com/sqlservertip/4445/sqoop-runtime-exception-cannot-load-sql-server-driver/
 
-java.lang.UnsupportedClassVersionError: com/microsoft/sqlserver/jdbc/SQLServerDriver : Unsupported major.minor version 52.0 => Use sqljdbc41.jar for Java 1.
+* java.lang.UnsupportedClassVersionError: com/microsoft/sqlserver/jdbc/SQLServerDriver : Unsupported major.minor version 52.0 => Use sqljdbc41.jar for Java 1.
+
+* Error en C:\tmp\logs: Eliminar la carpeta tmp y reiniciar los servidores
+
+* Sqoop epoch to date : select date_format(from_unixtime(cast(fechacompra/1000 as bigint)), 'yyyy-MM-dd') as day from reservaciones [Ref. (Yash Sharma's answer)](https://stackoverflow.com/questions/7211224ow-to-convert-unix-epoch-time-to-date-string-in-hive)
