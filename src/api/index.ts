@@ -6,7 +6,7 @@ const mysql = require('mysql')
 
 const kafka = new Kafka({
   clientId: 'my-app',
-  brokers: ['25.108.214.3:9092']
+  brokers: ['25.92.183.245:9092']
 })
 
 const memsqldb = mysql.createConnection({
@@ -24,20 +24,6 @@ memsqldb.connect(function (err) {
 
 let router = express.Router();
 
-router.get('/', async (req, res) => {
-  const producer = kafka.producer()
-
-  await producer.connect()
-  await producer.send({
-    topic: 'busquedas',
-    messages: [
-      { value: 'Hello KafkaJS user!' },
-    ],
-  })
-
-  await producer.disconnect()
-  res.send('DONE')
-});
 
 router.get('/buscar/:origen/:destino/:fecha', async(req, res) => {
   const origen = req.params.origen;
@@ -50,13 +36,29 @@ router.get('/buscar/:origen/:destino/:fecha', async(req, res) => {
 
   // Send the data to hive through kafka to process the price
   // TODO: n
+  const producer = kafka.producer()
+
+  await producer.connect()
+  await producer.send({
+    topic: 'kafkapython',
+    messages: [
+      { value: `insert into busquedas(origen, destino, fecha) values("${origen}", "${destino}", "${fecha}")`},
+    ],
+  })
+
+  await producer.disconnect()
 
   // Send the request to get the price in memsql
-  executeSearchQuery(req, res, origen, destino, fecha)
+  const sql_statement = `select precio from precios where origen = '${origen}' and destino = '${destino}' and DATEDIFF(fecha, '${fecha}') = 0 order by id desc limit 1`;
+  executeSearchQuery(req, res, origen, destino, fecha, true)
 })
 
-function executeSearchQuery(req, res, origen, destino, fecha) {
-    const sql_statement = `select precio from precios where origen = '${origen}' and destino = '${destino}' and DATEDIFF(fecha, '${fecha}') = 0 order by id desc limit 1`;
+function executeSearchQuery(req, res, origen, destino, fecha, datediff) {
+  var sql_statement:string;
+  if(datediff)
+    sql_statement = `select precio from precios where origen = '${origen}' and destino = '${destino}' and DATEDIFF(fecha, '${fecha}') = 0 order by id desc limit 1`;
+  else
+    sql_statement = `select precio from precios where origen = '${origen}' and destino = '${destino}' order by id desc limit 1`;
 
     memsqldb.query(sql_statement, (err, result) => {
       if (err) {
@@ -67,26 +69,11 @@ function executeSearchQuery(req, res, origen, destino, fecha) {
   
       if(result.length < 1){
         // Keep asking memsql for the price until it gets a response from hive
-        executeSearchQuery(req, res, origen, destino, fecha)
+        executeSearchQuery(req, res, origen, destino, fecha, false)
       }else
         res.status(200).send({"precio" : result[0].precio}) 
     });
 }
 
-router.get('/consume', async (req, res) => {
-  const consumer = kafka.consumer({ groupId: 'test-group' })
-
-  await consumer.connect()
-  await consumer.subscribe({ topic: 'busquedas', fromBeginning: true })
-
-  await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      console.log({
-        value: message.value.toString(),
-      })
-    },
-  })
-  res.send('DONE')
-});
 
 export = router;
